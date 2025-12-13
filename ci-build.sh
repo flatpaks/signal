@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-while getopts "n:v:b:" flag; do
+while getopts "a:n:v:b:" flag; do
     case "${flag}" in
         a) export ARCH=$OPTARG;;
         n) export NODE_VERSION=$OPTARG;;
