@@ -52,8 +52,6 @@ jobs:
     name: 'build arm64'
     if: ${{ github.event_name != 'workflow_dispatch' || ( github.event_name == 'workflow_dispatch' && github.event.inputs.aarch64 == 'true' ) }}
     steps:
-      - name: Set env.BRANCH
-        run: echo "BRANCH=$(echo $GITHUB_REF | cut -d'/' -f 3)" >> $GITHUB_ENV
       - name: cleanup
         uses: flatpaks/runner-cleanup@2
       - name: install dependnecies and secrets
@@ -87,8 +85,6 @@ jobs:
     name: 'build x86_64'
     if: ${{ github.event_name != 'workflow_dispatch' || ( github.event_name == 'workflow_dispatch' && github.event.inputs.x86_64 == 'true' ) }}
     steps:
-      - name: Set env.BRANCH
-        run: echo "BRANCH=$(echo $GITHUB_REF | cut -d'/' -f 3)" >> $GITHUB_ENV
       - name: cleanup
         uses: flatpaks/runner-cleanup@2
       - name: install dependencies and secrets
@@ -127,11 +123,11 @@ jobs:
       - build-amd64
     if: always() && (needs.build-arm64.result == 'skipped' || needs.build-arm64.result == 'success') && (needs.build-amd64.result == 'skipped' || needs.build-amd64.result == 'success')
     steps:
-      - name: Set env.BRANCH
-        run: echo "BRANCH=$(echo $GITHUB_REF | cut -d'/' -f 3)" >> $GITHUB_ENV
       - name: cleanup
         uses: flatpaks/runner-cleanup@2
-      - name: install dependencies and secrets
+      - name: checkout
+        uses: actions/checkout@v6
+      - name: setup flatpak, secrets, dependencies
         shell: bash
         env:
           GPG_KEY: ${{secrets.GPG_KEY}}
@@ -140,8 +136,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -qq -y gpg openssh-client bash rsync flatpak elfutils coreutils slirp4netns rootlesskit binfmt-support fuse-overlayfs flatpak-builder qemu-user-static unzip
           echo "$GPG_KEY" | gpg --import
-      - name: checkout code
-        uses: actions/checkout@v6
+          sudo rm -rf /opt/pakrepo/
+          sudo mkdir -p /opt/pakrepo
+          sudo chown "$USER" /opt/pakrepo
+          sudo usermod -a -G_flatpak $USER
+          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
       - name: Download arm64 artifacts
         if: ${{ needs.build-arm64.result == 'success' }}
         uses: actions/download-artifact@v7
@@ -154,14 +153,6 @@ jobs:
         with:
           path: .
           name: signal-amd64.deb
-      - name: set up flatpak
-        shell: bash
-        run: |
-          sudo rm -rf /opt/pakrepo/
-          sudo mkdir -p /opt/pakrepo
-          sudo chown "$USER" /opt/pakrepo
-          sudo usermod -a -G_flatpak $USER
-          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
       - name: build amd64 flatpak
         if: ${{ needs.build-amd64.result == 'success' }}
         shell: bash
