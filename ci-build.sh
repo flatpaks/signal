@@ -59,5 +59,6 @@ podman_exec /Signal-Desktop pnpm run build:release --"$ARCHSPECIFICVARIABLESHORT
 # copy .deb out of builder container
 podman cp signal-desktop-"$VERSION":/Signal-Desktop/release/signal-desktop_"$VERSION"_"$ARCHSPECIFICVARIABLECOMMON".deb ~/signal-"$ARCHSPECIFICVARIABLECOMMON".deb
 
-podman stop signal-desktop-"$VERSION"
-podman rm signal-desktop-"$VERSION"
+# nice to have if we run on self-hosted infra, but since the vm is wiped every github actions run, this just adds extra time.
+# podman stop signal-desktop-"$VERSION"
+# podman rm signal-desktop-"$VERSION"
