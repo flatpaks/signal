@@ -32,7 +32,6 @@ function podman_exec() {
     dir=$1
     shift 1
     podman exec -it -w $dir signal-desktop-"$VERSION" $@
-    sleep 1
 }
 
 podman_exec / git clone -q https://github.com/signalapp/Signal-Desktop -b $BRANCH
