@@ -17,28 +17,12 @@ BETA='false'
 
 while getopts 'pbh' OPTION; do
 	case "$OPTION" in
-		p)
-			PUSH='true'
-			;;
-		b)
-			BETA='true'
-			;;
-		h)
-			usage
-			exit 0
-			;;
-		*)
-			usage
-			exit 1
-			;;
+		p) PUSH='true' ;;
+		b) BETA='true' ;;
+		h) usage; exit 0 ;;
+		*) usage; exit 1 ;;
 	esac
 done
-
-
-deps(){
-	dep_packages="jq curl"
-	sudo apt -qq install $dep_packages
-}
 
 # get latest non-beta release version from github API
 latest_ver=$(curl -s https://api.github.com/repos/signalapp/signal-desktop/releases|jq -r '[.[] | select(.prerelease|not).tag_name][0]')
@@ -73,7 +57,7 @@ if [[ "$node_version" == "" ]];then
     exit 1
 fi
 
-sed -i "s/NODE_VERSION: .*/NODE_VERSION: ${node_version}/" .github/workflows/build.yml
+sed -i "s/NODE_VERSION: .*/NODE_VERSION: \"v${node_version}\"/" .github/workflows/build.yml
 sed -i "s/SIGNAL_VERSION: .*/SIGNAL_VERSION: \"$version\"/" .github/workflows/build.yml
 sed -i "s/SIGNAL_BRANCH: .*/SIGNAL_BRANCH: \"$branch\"/" .github/workflows/build.yml
 
