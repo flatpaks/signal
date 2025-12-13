@@ -1,14 +1,20 @@
 #!/usr/bin/env bash
 
-# script must be run with VERSION set to a proper signal version
+while getopts "n:v:b:" flag; do
+    case "${flag}" in
+        a) export ARCH=$OPTARG;;
+        n) export NODE_VERSION=$OPTARG;;
+	v) export VERSION=$OPTARG ;;
+        b) export BRANCH=$OPTARG ;;
+    esac
+done
 
-echo "###ci-build.sh###"
-set -x
+echo $VERSION $BRANCH $NODE_VERSION
 
-if [ "$1" == "amd64" ]; then
+if [ "$ARCH" == "amd64" ]; then
 	ARCHSPECIFICVARIABLECOMMON="amd64"
 	ARCHSPECIFICVARIABLESHORT="x64"
-elif [ "$1" == "arm64" ]; then
+elif [ "$ARCH" == "arm64" ]; then
 	ARCHSPECIFICVARIABLECOMMON="arm64"
 	ARCHSPECIFICVARIABLESHORT="arm64"
 else
@@ -16,13 +22,7 @@ else
 	exit 1
 fi
 
-NODE_VERSION=v22.21.1
-
-if [[ $VERSION == "" || $NODE_VERSION == "" ]];then
-    echo "Unset VERSION or NODE_VERSION, exiting."
-    echo "VERSION: $VERSION NODE_VERSION: $NODE_VERSION"
-    exit 1
-fi
+set -x
 
 shopt -s localvar_inherit
 podman create --name=signal-desktop-"$VERSION" --arch "$ARCHSPECIFICVARIABLECOMMON" -it ghcr.io/flatpaks/signalimage:latest bash
@@ -35,7 +35,7 @@ function podman_exec() {
     sleep 1
 }
 
-podman_exec / git clone -q https://github.com/signalapp/Signal-Desktop -b 7.82.x
+podman_exec / git clone -q https://github.com/signalapp/Signal-Desktop -b $BRANCH
 
 podman_exec /opt/ wget -q https://nodejs.org/dist/"$NODE_VERSION"/node-"$NODE_VERSION"-linux-"$ARCHSPECIFICVARIABLESHORT".tar.gz
 podman_exec /opt/ tar xf node-"$NODE_VERSION"-linux-"$ARCHSPECIFICVARIABLESHORT".tar.gz
@@ -61,3 +61,6 @@ podman_exec /Signal-Desktop pnpm run build:release --"$ARCHSPECIFICVARIABLESHORT
 
 # copy .deb out of builder container
 podman cp signal-desktop-"$VERSION":/Signal-Desktop/release/signal-desktop_"$VERSION"_"$ARCHSPECIFICVARIABLECOMMON".deb ~/signal-"$ARCHSPECIFICVARIABLECOMMON".deb
+
+podman stop signal-desktop-"$VERSION"
+podman rm signal-desktop-"$VERSION"

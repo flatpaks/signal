@@ -72,15 +72,12 @@ if [[ "$node_version" == "" ]];then
     echo "Could not get node version?"
     exit 1
 fi
-node_version_ci_build=$(grep NODE_VERSION= ci-build.sh | sed 's/.*v//')
 
-if [ ! "${node_version_ci_build}" == "${node_version}" ]; then
-    sed -i "s/${node_version_ci_build}/${node_version}/g" ci-build.sh
-fi
-sed -e "s,git clone -q https://github.com/signalapp/Signal-Desktop -b .*,git clone -q https://github.com/signalapp/Signal-Desktop -b $branch," -i ci-build.sh
+sed -i "s/NODE_VERSION: .*/NODE_VERSION: ${node_version}/" .github/workflows/build.yml
+sed -i "s/SIGNAL_VERSION: .*/SIGNAL_VERSION: \"$version\"/" .github/workflows/build.yml
+sed -i "s/SIGNAL_BRANCH: .*/SIGNAL_BRANCH: \"$branch\"/" .github/workflows/build.yml
 
 # replace the VERSION variable in the CI manifests
-sed -e "s,VERSION: .*$,VERSION: \"$version\"," -i .github/workflows/build.yml
 dt=$(date +%Y-%m-%d)
 sed -e "s,<release version.*,<release version=\"${latest_ver:1}\" date=\"$dt\"/>," -i org.signal.Signal.metainfo.xml
 sed -e "s,export VERSION=.*$,export VERSION=\"$version\"," -i README.md
