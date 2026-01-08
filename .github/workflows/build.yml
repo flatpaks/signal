@@ -38,6 +38,7 @@ jobs:
       SIGNAL_VERSION: "7.84.0"
       NODE_VERSION: "v22.21.1"
       SIGNAL_BRANCH: "7.84.x"
+      ARCH: "arm64"
     steps:
       - name: cleanup
         uses: flatpaks/runner-cleanup@2
@@ -52,13 +53,13 @@ jobs:
         shell: bash
         run: |
           set -x
-          bash ci-build.sh -a arm64 -v $SIGNAL_VERSION -n $NODE_VERSION -b $SIGNAL_BRANCH
-          mv ~/signal-arm64.deb .
+          bash ci-build.sh -a $ARCH -v $SIGNAL_VERSION -n $NODE_VERSION -b $SIGNAL_BRANCH
+          mv ~/signal-$ARCH.deb .
       - name: Upload arm64
         uses: actions/upload-artifact@v6
         with:
-          path: signal-arm64.deb
-          name: signal-arm64.deb
+          path: signal-${{ env.ARCH }}.deb
+          name: signal-${{ env.ARCH }}.deb
 
   build-amd64:
     runs-on: ubuntu-24.04
@@ -79,13 +80,13 @@ jobs:
           sudo apt-get install -qq -y gpg openssh-client bash rsync elfutils coreutils slirp4netns rootlesskit binfmt-support fuse-overlayfs qemu-user-static podman
       - name: checkout code
         uses: actions/checkout@v6
-      - name: build ${{ env.ARCH }}
+      - name: build x86_64
         shell: bash
         run: |
           set -x
           bash ci-build.sh -a $ARCH -v $SIGNAL_VERSION -n $NODE_VERSION -b $SIGNAL_BRANCH
           mv ~/signal-$ARCH.deb .
-      - name: Upload ${{ env.ARCH }}
+      - name: Upload x86_64
         uses: actions/upload-artifact@v6
         with:
           path: signal-${{ env.ARCH }}.deb
