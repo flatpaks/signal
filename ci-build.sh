@@ -36,9 +36,10 @@ function podman_exec() {
 
 podman_exec / git clone -q https://github.com/signalapp/Signal-Desktop -b $BRANCH
 
-podman_exec /opt/ wget -q https://nodejs.org/dist/"$NODE_VERSION"/node-"$NODE_VERSION"-linux-"$ARCHSPECIFICVARIABLESHORT".tar.gz
-podman_exec /opt/ tar xf node-"$NODE_VERSION"-linux-"$ARCHSPECIFICVARIABLESHORT".tar.gz
-podman_exec /opt/ mv node-"$NODE_VERSION"-linux-"$ARCHSPECIFICVARIABLESHORT" node
+#podman_exec /opt/ wget -q https://nodejs.org/dist/"$NODE_VERSION"/node-"$NODE_VERSION"-linux-"$ARCHSPECIFICVARIABLESHORT".tar.gz
+#podman_exec /opt/ tar xf node-"$NODE_VERSION"-linux-"$ARCHSPECIFICVARIABLESHORT".tar.gz
+#podman_exec /opt/ mv node-"$NODE_VERSION"-linux-"$ARCHSPECIFICVARIABLESHORT" node
+podman_exec /Signal-Desktop nvm install
 
 podman_exec /Signal-Desktop git-lfs install
 podman_exec /Signal-Desktop git config --global user.name name
