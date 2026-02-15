@@ -24,6 +24,8 @@ fi
 
 set -x
 
+export NVM_SYMLINK_CURRENT="true"
+
 shopt -s localvar_inherit
 podman create --name=signal-desktop-"$VERSION" --arch "$ARCHSPECIFICVARIABLECOMMON" -it ghcr.io/flatpaks/signalimage:latest bash
 podman start signal-desktop-"$VERSION"
@@ -39,7 +41,8 @@ podman_exec / git clone -q https://github.com/signalapp/Signal-Desktop -b $BRANC
 #podman_exec /opt/ wget -q https://nodejs.org/dist/"$NODE_VERSION"/node-"$NODE_VERSION"-linux-"$ARCHSPECIFICVARIABLESHORT".tar.gz
 #podman_exec /opt/ tar xf node-"$NODE_VERSION"-linux-"$ARCHSPECIFICVARIABLESHORT".tar.gz
 #podman_exec /opt/ mv node-"$NODE_VERSION"-linux-"$ARCHSPECIFICVARIABLESHORT" node
-podman_exec /Signal-Desktop nvm install
+podman_exec /Signal-Desktop nvm install node
+podman_exec /Signal-Desktop nvm use node
 
 podman_exec /Signal-Desktop git-lfs install
 podman_exec /Signal-Desktop git config --global user.name name
